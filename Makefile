@@ -1,62 +1,70 @@
-# Variables
-APP_NAME := chatwoot
-RAILS_ENV ?= development
+.PHONY: help up down logs restart db-prepare shell status ps
 
-# Targets
-setup:
-	gem install bundler
-	bundle install
-	pnpm install
+COMPOSE := docker compose -f docker-compose.production.yaml
+COMPOSE_EXEC := $(COMPOSE) exec -it rails
 
-db_create:
-	RAILS_ENV=$(RAILS_ENV) bundle exec rails db:create
+help:
+	@echo "Chatwoot Production Docker Commands"
+	@echo ""
+	@echo "Usage: make [command]"
+	@echo ""
+	@echo "Commands:"
+	@echo "  make up                - Start all services"
+	@echo "  make down              - Stop all services"
+	@echo "  make down-volumes      - Stop services and remove volumes"
+	@echo "  make restart           - Restart all services"
+	@echo "  make logs              - View logs from all services"
+	@echo "  make logs-rails        - View Rails logs"
+	@echo "  make logs-redis        - View Redis logs"
+	@echo "  make logs-postgres     - View PostgreSQL logs"
+	@echo "  make db-prepare        - Prepare database (initial setup/migrations)"
+	@echo "  make shell             - Open Rails console"
+	@echo "  make status            - Show services status"
+	@echo "  make ps                - Show running containers"
+	@echo ""
 
-db_migrate:
-	RAILS_ENV=$(RAILS_ENV) bundle exec rails db:migrate
+up:
+	$(COMPOSE) up -d
+	@echo "✅ Chatwoot services started"
 
-db_seed:
-	RAILS_ENV=$(RAILS_ENV) bundle exec rails db:seed
+down:
+	$(COMPOSE) down
+	@echo "✅ Chatwoot services stopped"
 
-db_reset:
-	RAILS_ENV=$(RAILS_ENV) bundle exec rails db:reset
+down-volumes:
+	$(COMPOSE) down -v
+	@echo "✅ Chatwoot services stopped and volumes removed"
 
-db:
-	RAILS_ENV=$(RAILS_ENV) bundle exec rails db:chatwoot_prepare
+restart: down up
+	@echo "✅ Chatwoot services restarted"
 
-console:
-	RAILS_ENV=$(RAILS_ENV) bundle exec rails console
+logs:
+	$(COMPOSE) logs -f
 
-server:
-	RAILS_ENV=$(RAILS_ENV) bundle exec rails server -b 0.0.0.0 -p 3000
+logs-rails:
+	$(COMPOSE) logs -f rails
 
-burn:
-	bundle && pnpm install
+logs-redis:
+	$(COMPOSE) logs -f redis
 
-run:
-	@if [ -f ./.overmind.sock ]; then \
-		echo "Overmind is already running. Use 'make force_run' to start a new instance."; \
-	else \
-		overmind start -f Procfile.dev; \
-	fi
+logs-postgres:
+	$(COMPOSE) logs -f postgres
 
-force_run:
-	rm -f ./.overmind.sock
-	rm -f tmp/pids/*.pid
-	overmind start -f Procfile.dev
+db-prepare:
+	$(COMPOSE) run --rm rails bundle exec rails db:chatwoot_prepare
+	@echo "✅ Database prepared"
 
-force_run_tunnel:
-	lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-	rm -f ./.overmind.sock
-	rm -f tmp/pids/*.pid
-	overmind start -f Procfile.tunnel
+shell:
+	$(COMPOSE_EXEC) bash -c 'RAILS_ENV=production bundle exec rails c'
 
-debug:
-	overmind connect backend
+status:
+	$(COMPOSE) ps
 
-debug_worker:
-	overmind connect worker
+ps:
+	docker ps | grep chatwoot
 
-docker: 
-	docker build -t $(APP_NAME) -f ./docker/Dockerfile .
+test-connection:
+	curl -I http://localhost:3000/api
+	@echo ""
+	@echo "✅ Connection test complete"
 
-.PHONY: setup db_create db_migrate db_seed db_reset db console server burn docker run force_run force_run_tunnel debug debug_worker
