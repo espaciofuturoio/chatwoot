@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo: Personalizar Botón de Chatwoot con customCSS</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .example {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 { color: #555; margin-top: 30px; }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border-left: 4px solid #8caca1;
+        }
+        .info {
+            background: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #0066cc;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Personalizar el Widget de Chatwoot con customCSS</h1>
+
+    <div class="info">
+        <strong>✅ Nueva Funcionalidad:</strong> Ahora puedes personalizar completamente el estilo del widget de Chatwoot
+        incluyendo el botón "Start Conversation" usando el parámetro <code>customCSS</code>.
+    </div>
+
+    <div class="example">
+        <h2>📝 Ejemplo 1: Personalizar el Botón "Start Conversation"</h2>
+        <p>Este es el ejemplo más común: cambiar el color, padding, border-radius y hover del botón.</p>
+
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;script&gt;
+        (function(d, t) {
+            var BASE_URL = "https://tu-dominio.com";
+            var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+            g.src = BASE_URL + "/packs/js/sdk.js";
+            g.async = true;
+            s.parentNode.insertBefore(g, s);
+            g.onload = function() {
+                window.chatwootSDK.run({
+                    websiteToken: "tu-website-token",
+                    baseUrl: BASE_URL,
+                    customCSS: `
+                        /* Personalizar el botón "Start Conversation" */
+                        button[class*="inline-flex"] {
+                            background-color: #8caca1 !important;
+                            color: #ffffff !important;
+                            border-radius: 8px !important;
+                            padding: 10px 16px !important;
+                            border: none !important;
+                        }
+
+                        button[class*="inline-flex"]:hover {
+                            background-color: #7a9690 !important;
+                            box-shadow: 0 4px 12px rgba(140, 172, 161, 0.3) !important;
+                        }
+
+                        button[class*="inline-flex"]:active {
+                            transform: scale(0.98) !important;
+                        }
+                    `
+                })
+            }
+        })(document, "script");
+    &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Mi Sitio Web&lt;/h1&gt;
+    &lt;p&gt;Bienvenido! El chat de soporte está abajo a la derecha.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <p><strong>Resultado:</strong> El botón tendrá:</p>
+        <ul>
+            <li>🎨 Fondo verde (#8caca1)</li>
+            <li>✍️ Texto blanco</li>
+            <li>⌘ Border radius: 8px</li>
+            <li>📏 Padding: 10px 16px</li>
+            <li>✨ Hover con sombra y color más oscuro</li>
+        </ul>
+    </div>
+
+    <div class="example">
+        <h2>📝 Ejemplo 2: Temas Personalizados Avanzados</h2>
+        <p>Personaliza múltiples elementos del widget simultáneamente.</p>
+
+        <pre><code>window.chatwootSDK.run({
+    websiteToken: "tu-website-token",
+    baseUrl: BASE_URL,
+    customCSS: `
+        /* Contenedor principal del widget */
+        .flex.flex-col.justify-end {
+            border-radius: 16px !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* Botón principal */
+        button[class*="inline-flex"] {
+            background: linear-gradient(135deg, #8caca1 0%, #7a9690 100%) !important;
+            color: white !important;
+            border-radius: 8px !important;
+            padding: 12px 20px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 15px rgba(140, 172, 161, 0.4) !important;
+        }
+
+        button[class*="inline-flex"]:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(140, 172, 161, 0.6) !important;
+        }
+
+        /* Iconos dentro del botón */
+        button[class*="inline-flex"] i {
+            color: white !important;
+        }
+
+        /* Mensajes disponibles */
+        .text-n-slate-12 {
+            color: #2d3748 !important;
+        }
+
+        /* Links dentro del widget */
+        a {
+            color: #8caca1 !important;
+        }
+
+        a:hover {
+            color: #7a9690 !important;
+        }
+
+        /* Inputs y campos de formulario */
+        input, textarea {
+            border-color: #8caca1 !important;
+            border-radius: 6px !important;
+        }
+
+        input:focus, textarea:focus {
+            outline: none !important;
+            border-color: #7a9690 !important;
+            box-shadow: 0 0 0 3px rgba(140, 172, 161, 0.1) !important;
+        }
+    `
+})</code></pre>
+    </div>
+
+    <div class="example">
+        <h2>📝 Ejemplo 3: Dark Mode Personalizado</h2>
+        <p>Aplicar estilos personalizados en modo oscuro.</p>
+
+        <pre><code>window.chatwootSDK.run({
+    websiteToken: "tu-website-token",
+    baseUrl: BASE_URL,
+    customCSS: `
+        /* En modo oscuro */
+        .dark button[class*="inline-flex"] {
+            background-color: #5a7a6f !important;
+            color: #f0f0f0 !important;
+        }
+
+        .dark button[class*="inline-flex"]:hover {
+            background-color: #4a6a5f !important;
+        }
+
+        .dark .text-n-slate-12 {
+            color: #e0e0e0 !important;
+        }
+    `
+})</code></pre>
+    </div>
+
+    <div class="example">
+        <h2>🔍 Selectores CSS Útiles</h2>
+        <p>Aquí están los selectores CSS principales del widget de Chatwoot:</p>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="background: #f0f0f0;">
+                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Elemento</th>
+                <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Selector</th>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Botón "Start Conversation"</td>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>button[class*="inline-flex"]</code></td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Contenedor principal</td>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>.flex.flex-col.justify-end</code></td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Iconos</td>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>i.i-lucide-chevron-right</code></td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Texto disponible</td>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>.text-n-slate-12</code></td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Contenedor shadow</td>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>.shadow</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="example">
+        <h2>⚙️ Detalles de Implementación</h2>
+
+        <h3>1. En el SDK (app/javascript/entrypoints/sdk.js)</h3>
+        <ul>
+            <li>✅ Se agregó el parámetro <code>customCSS</code> a <code>window.chatwootSettings</code></li>
+            <li>✅ Se almacena en <code>window.$chatwoot.customCSS</code></li>
+        </ul>
+
+        <h3>2. En IFrameHelper (app/javascript/sdk/IFrameHelper.js)</h3>
+        <ul>
+            <li>✅ Se pasa <code>customCSS</code> al iframe cuando se recibe el evento 'loaded'</li>
+            <li>✅ Se envía a través del mensaje 'config-set'</li>
+        </ul>
+
+        <h3>3. En App.vue (app/javascript/widget/App.vue)</h3>
+        <ul>
+            <li>✅ Se agregó el método <code>injectCustomCSS()</code></li>
+            <li>✅ Se inyecta en el evento 'config-set'</li>
+            <li>✅ Se crea un <code>&lt;style&gt;</code> con id 'cw-custom-widget-styles'</li>
+            <li>✅ Se evita inyección duplicada</li>
+        </ul>
+    </div>
+
+    <div class="example">
+        <h2>💡 Tips y Buenas Prácticas</h2>
+
+        <h3>1. Usar !important para sobreescribir estilos</h3>
+        <pre><code>/* ✅ Recomendado */
+color: #ffffff !important;
+
+/* ❌ Podría no funcionar */
+color: #ffffff;</code></pre>
+
+        <h3>2. Testear en diferentes navegadores</h3>
+        <p>Asegúrate de probar tu CSS personalizado en:</p>
+        <ul>
+            <li>Chrome / Edge</li>
+            <li>Firefox</li>
+            <li>Safari</li>
+            <li>Dispositivos móviles</li>
+        </ul>
+
+        <h3>3. Considerar modo oscuro</h3>
+        <pre><code>/* Modo claro */
+button { background-color: #8caca1 !important; }
+
+/* Modo oscuro */
+.dark button { background-color: #5a7a6f !important; }</code></pre>
+
+        <h3>4. Usar transiciones suaves</h3>
+        <pre><code>button {
+    transition: all 0.3s ease !important;
+}</code></pre>
+
+        <h3>5. Mantener CSS legible</h3>
+        <ul>
+            <li>Usa variables CSS cuando sea posible</li>
+            <li>Comenta secciones principales</li>
+            <li>Mantén el CSS minificado en producción</li>
+        </ul>
+    </div>
+
+    <div class="example">
+        <h2>🐛 Troubleshooting</h2>
+
+        <h3>Los estilos no se aplican</h3>
+        <ul>
+            <li>Verifica que uses <code>!important</code></li>
+            <li>Abre DevTools (F12) y busca el elemento <code>#cw-custom-widget-styles</code></li>
+            <li>Comprueba que el CSS sea válido</li>
+        </ul>
+
+        <h3>El botón no es clickeable después de personalizar</h3>
+        <ul>
+            <li>Asegúrate de no establecer <code>pointer-events: none</code></li>
+            <li>Verifica que la propiedad <code>cursor</code> sea correcta</li>
+        </ul>
+
+        <h3>Los cambios no aparecen en el iframe</h3>
+        <ul>
+            <li>Limpia el caché del navegador (Ctrl+Shift+Delete)</li>
+            <li>Verifica que el parámetro se pase correctamente al <code>chatwootSDK.run()</code></li>
+            <li>Revisa la consola del navegador para errores</li>
+        </ul>
+    </div>
+
+    <div class="info" style="background: #f0f8f0; border-left-color: #28a745;">
+        <strong>🎉 ¡Listo!</strong> Ahora puedes personalizar completamente el aspecto del widget de Chatwoot.
+        Copia el HTML de ejemplo anterior, reemplaza tu <code>websiteToken</code> y <code>baseUrl</code>,
+        y ajusta el CSS según tus necesidades.
+    </div>
+
+</body>
+</html>
+

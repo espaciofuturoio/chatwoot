@@ -261,6 +261,7 @@ export default {
           this.setAppConfig(message);
           this.$store.dispatch('contacts/get');
           this.setCampaignReadData(message.campaignsSnoozedTill);
+          this.injectCustomCSS(message.customCSS);
         } else if (message.event === 'widget-visible') {
           this.scrollConversationToBottom();
         } else if (message.event === 'change-url') {
@@ -344,6 +345,19 @@ export default {
       if (snoozedTill) {
         this.campaignsSnoozedTill = Number(snoozedTill);
       }
+    },
+    injectCustomCSS(customCSS) {
+      if (!customCSS) return;
+
+      // Check if custom style already exists
+      if (document.getElementById('cw-custom-widget-styles')) {
+        return;
+      }
+
+      const style = document.createElement('style');
+      style.id = 'cw-custom-widget-styles';
+      style.innerHTML = customCSS;
+      document.head.appendChild(style);
     },
   },
 };
