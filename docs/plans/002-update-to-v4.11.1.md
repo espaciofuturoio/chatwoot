@@ -1,98 +1,129 @@
-# Actualizar Chatwoot a v4.11.1
+# Actualizar Chatwoot desde upstream (v4.11.1 y futuras versiones)
 
-## Verificación (feb 2025)
-
-- **Repo**: `/opt/chatwoot` (submódulo → `espaciofuturoio/chatwoot`).
-- **Upstream**: `https://github.com/chatwoot/chatwoot.git` (remoto `upstream`).
-- **Rama actual**: `production`.
-- **Versión en código**: `config/app.yml` → `4.7.0`.
-- **Última versión upstream**: **v4.11.1** (tag ya traído con `git fetch upstream --tags`).
-
-### Estado respecto a v4.11.1
-
-| Concepto | Valor |
-|--------|--------|
-| Commits en **v4.11.1** que no tienes | **273** (traerías todas las mejoras/parches hasta 4.11.1) |
-| Commits **solo en production** (fork) | **5** (hay que conservarlos) |
-
-Commits propios a conservar:
-
-- `chore: increase rate limit`
-- `chore: use custom style` (custom CSS widget)
-- `chore: sync upstream`
-- `Merge branch 'develop' into production`
-- `chore: improve docker compose - load password from .env`
-
-**Conclusión**: Sí se puede actualizar. La forma más segura es hacer **merge** de `v4.11.1` en `production` (no rebase), para no reescribir historia y mantener tus 5 commits.
+Este documento registra **qué se hizo** en la actualización a v4.11.1 y **cómo repetir el proceso** para futuras versiones. Está pensado para que tanto humanos como IA (Cursor, Claude, etc.) puedan seguir los pasos.
 
 ---
 
-## Pasos recomendados para actualizar
+## Lo que hicimos (feb 2025 — actualización a v4.11.1)
 
-Hacerlo en máquina de desarrollo/staging primero; luego repetir en producción cuando esté estable.
+- **Repo**: `/opt/chatwoot` (submódulo → `espaciofuturoio/chatwoot`). Remoto upstream: `https://github.com/chatwoot/chatwoot.git`.
+- **Rama de trabajo**: `production` (fork); actualización en rama `update-to-4.11.1`.
 
-1. **Entrar al submódulo y asegurar remotos**
-   ```bash
-   cd /opt/chatwoot
-   git fetch upstream --tags
-   git checkout production
-   ```
+### Pasos ejecutados
 
-2. **Crear rama de actualización (opcional pero recomendado)**
-   ```bash
-   git checkout -b update-to-4.11.1
-   ```
+1. **Rama de respaldo**  
+   Se creó `backup/production-pre-4.11.1` desde `production` (estado antes del merge). Así se puede volver atrás con `git checkout production && git reset --hard backup/production-pre-4.11.1` si hace falta.
 
-3. **Merge de v4.11.1**
-   ```bash
-   git merge v4.11.1 -m "Merge upstream v4.11.1 into production"
-   ```
+2. **Rama de actualización**  
+   Se creó `update-to-4.11.1` desde `production`.
 
-4. **Resolver conflictos**  
-   Si hay conflictos, resolver (priorizar conservar vuestros cambios de rate limit, custom style y docker compose). Luego:
-   ```bash
-   git add .
-   git commit -m "Resolve merge conflicts with v4.11.1"
-   ```
+3. **Merge de upstream**  
+   `git fetch upstream --tags` y `git merge v4.11.1 -m "Merge upstream v4.11.1 into production"`. El merge se hizo sin conflictos (estrategia `ort`). Los commits propios del fork (rate limit, custom CSS widget, docker compose .env, etc.) se mantuvieron en la historia.
 
-5. **Actualizar versión en configuración**
-   - Editar `config/app.yml`: cambiar `version: '4.7.0'` a `version: '4.11.1'`.
-   - Commit: `chore: set version to 4.11.1`.
+4. **Versión**  
+   `config/app.yml` pasó a `version: '4.11.1'` (incluido en el merge de upstream).
 
-6. **Instalar dependencias y migraciones**
-   ```bash
-   bundle install
-   pnpm install
-   bundle exec rails db:migrate
-   ```
+5. **Push al fork**  
+   Se subieron las ramas `backup/production-pre-4.11.1` y `update-to-4.11.1` a `origin` (espaciofuturoio/chatwoot).
 
-7. **Pruebas básicas**
-   - `pnpm dev` o `make run` y comprobar login, inbox, widget (incluido custom CSS).
-   - Si usáis Docker: reconstruir imagen y probar con `docker-compose`.
+### Estado después de la actualización
 
-8. **Subir a vuestro fork**
-   ```bash
-   git push origin update-to-4.11.1   # o production si hiciste merge directo en production
-   ```
+- `backup/production-pre-4.11.1`: respaldo del `production` anterior.
+- `update-to-4.11.1`: contiene production + merge de v4.11.1; lista para pruebas y luego merge a `production`.
+- `production`: sin cambiar todavía; se actualizará cuando se haga merge de `update-to-4.11.1` y se validen migraciones y pruebas.
 
-9. **Actualizar submódulo en el repo padre**
-   Desde `/opt`:
-   ```bash
-   git add chatwoot
-   git commit -m "update chatwoot submodule to v4.11.1"
-   git push origin main   # o la rama que uses
-   ```
+### Pendiente (para quien despliegue)
+
+- En el entorno donde corre Chatwoot: `bundle install`, `pnpm install`, `bundle exec rails db:migrate`, y pruebas (widget, custom CSS, etc.).
+- Si todo va bien: `git checkout production && git merge update-to-4.11.1 && git push origin production`.
+- Desde `/opt`: `git add chatwoot && git commit -m "update chatwoot submodule to v4.11.1" && git push`.
 
 ---
 
-## Si algo sale mal
+## Cómo actualizar Chatwoot en el futuro (para IA y humanos)
 
-- Para abortar el merge antes de commitear: `git merge --abort`.
-- La rama `production` no se habrá movido hasta que hagas `git checkout production && git merge update-to-4.11.1` (o hagas el merge directamente en `production` y push).
+Usar este flujo cada vez que se quiera traer una nueva versión upstream (p. ej. v4.12.0). Sustituir `VERSION` por el tag deseado (ej: `v4.12.0`).
+
+### 1. Verificar remotos y traer tags
+
+```bash
+cd /opt/chatwoot
+git fetch upstream --tags
+git checkout production
+```
+
+Comprobar que el tag existe: `git tag -l 'v4.*'`.
+
+### 2. Crear rama de respaldo y rama de actualización
+
+```bash
+git branch backup/production-pre-VERSION    # ej: backup/production-pre-4.12.0
+git checkout -b update-to-VERSION           # ej: update-to-4.12.0
+```
+
+### 3. Merge del tag de upstream
+
+```bash
+git merge VERSION -m "Merge upstream VERSION into production"
+```
+
+Si hay conflictos: resolver (priorizar cambios propios: rate limit, custom CSS, docker compose), luego:
+
+```bash
+git add .
+git commit -m "Resolve merge conflicts with VERSION"
+```
+
+### 4. Versión en configuración
+
+Si el merge no actualizó `config/app.yml`, editar y poner `version: 'X.Y.Z'` según la versión. Hacer commit si hubo cambio.
+
+### 5. Dependencias y migraciones (en el entorno de despliegue)
+
+```bash
+bundle install
+pnpm install
+bundle exec rails db:migrate
+```
+
+### 6. Pruebas
+
+- Arrancar con `pnpm dev` o `make run` (o Docker) y comprobar login, inbox, widget (incl. custom CSS si aplica).
+
+### 7. Subir ramas al fork
+
+```bash
+git push origin backup/production-pre-VERSION
+git push origin update-to-VERSION
+```
+
+### 8. Integrar en production (cuando las pruebas estén bien)
+
+```bash
+git checkout production
+git merge update-to-VERSION -m "Merge update-to-VERSION into production"
+git push origin production
+```
+
+### 9. Actualizar submódulo en el repo padre
+
+Desde `/opt`:
+
+```bash
+git add chatwoot
+git commit -m "update chatwoot submodule to VERSION"
+git push origin main
+```
+
+### Si algo sale mal
+
+- Antes de commitear el merge: `git merge --abort`.
+- Volver al estado anterior en `production`: `git checkout production && git reset --hard backup/production-pre-VERSION` (solo si no se ha hecho push de production después del backup).
 
 ---
 
 ## Referencias
 
 - [Chatwoot releases](https://github.com/chatwoot/chatwoot/releases)
-- Changelog: https://www.chatwoot.com/changelog/
+- [Changelog](https://www.chatwoot.com/changelog/)
+- Repo upstream: `https://github.com/chatwoot/chatwoot.git` (remoto `upstream` en este repo).
