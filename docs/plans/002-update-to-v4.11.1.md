@@ -32,11 +32,15 @@ Este documento registra **qué se hizo** en la actualización a v4.11.1 y **cóm
 - `update-to-4.11.1`: contiene production + merge de v4.11.1; lista para pruebas y luego merge a `production`.
 - `production`: sin cambiar todavía; se actualizará cuando se haga merge de `update-to-4.11.1` y se validen migraciones y pruebas.
 
-### Pendiente (para quien despliegue)
+### Completado después (misma sesión)
 
-- En el entorno donde corre Chatwoot: `bundle install`, `pnpm install`, `bundle exec rails db:migrate`, y pruebas (widget, custom CSS, etc.).
-- Si todo va bien: `git checkout production && git merge update-to-4.11.1 && git push origin production`.
-- Desde `/opt`: `git add chatwoot && git commit -m "update chatwoot submodule to v4.11.1" && git push`.
+- Merge de `update-to-4.11.1` en `production` y push a `origin production`.
+- Submódulo en `/opt` actualizado al commit de production (v4.11.1) y push a `main`.
+
+### Pendiente (dependencias y migraciones)
+
+- El proyecto requiere **Ruby 3.4.4** (`.ruby-version`). En entornos con otra versión (p. ej. 3.2), instalar Ruby 3.4.4 (rbenv/asdf) o ejecutar todo dentro del **contenedor Docker** de Chatwoot.
+- En el entorno donde corre Chatwoot (con Ruby 3.4.4 o en Docker): `bundle install`, `pnpm install`, `bundle exec rails db:migrate`, y reiniciar el servicio. Probar widget y custom CSS.
 
 ---
 
