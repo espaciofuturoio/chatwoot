@@ -2,6 +2,9 @@
 
 Este documento registra **qué se hizo** en la actualización a v4.11.1 y **cómo repetir el proceso** para futuras versiones. Está pensado para que tanto humanos como IA (Cursor, Claude, etc.) puedan seguir los pasos.
 
+> **Importante — Cómo corre Chatwoot en este servidor:**  
+> **Siempre usamos Docker Compose**, no `make run` ni Ruby en el host. Archivo: `docker-compose.custom-css.yaml`. Imagen: `chatwoot/chatwoot:custom-css`. Cualquier paso de migraciones, reinicio o build debe hacerse con `docker compose -f docker-compose.custom-css.yaml ...`.
+
 ---
 
 ## Lo que hicimos (feb 2025 — actualización a v4.11.1)
@@ -37,10 +40,28 @@ Este documento registra **qué se hizo** en la actualización a v4.11.1 y **cóm
 - Merge de `update-to-4.11.1` en `production` y push a `origin production`.
 - Submódulo en `/opt` actualizado al commit de production (v4.11.1) y push a `main`.
 
-### Pendiente (dependencias y migraciones)
+### Despliegue en este servidor: Docker Compose (siempre)
 
-- El proyecto requiere **Ruby 3.4.4** (`.ruby-version`). En entornos con otra versión (p. ej. 3.2), instalar Ruby 3.4.4 (rbenv/asdf) o ejecutar todo dentro del **contenedor Docker** de Chatwoot.
-- En el entorno donde corre Chatwoot (con Ruby 3.4.4 o en Docker): `bundle install`, `pnpm install`, `bundle exec rails db:migrate`, y reiniciar el servicio. Probar widget y custom CSS.
+En este servidor Chatwoot **solo** corre con **docker-compose.custom-css.yaml** (imagen `chatwoot/chatwoot:custom-css`). Para aplicar la actualización a v4.11.1:
+
+1. **Reconstruir la imagen** (código ya está en `production`):
+   ```bash
+   cd /opt/chatwoot
+   docker build -f docker/Dockerfile -t chatwoot/chatwoot:custom-css .
+   ```
+2. **Ejecutar migraciones** con la nueva imagen:
+   ```bash
+   docker compose -f docker-compose.custom-css.yaml run --rm rails bundle exec rails db:migrate
+   ```
+3. **Reiniciar servicios** para usar la nueva imagen:
+   ```bash
+   docker compose -f docker-compose.custom-css.yaml down
+   docker compose -f docker-compose.custom-css.yaml up -d
+   ```
+
+### Referencia: si en otro entorno usaran Ruby en el host
+
+- En este servidor **no** se usa; aquí todo es Docker Compose. Solo por referencia: el proyecto requiere Ruby 3.4.4; luego `bundle install`, `pnpm install`, `bundle exec rails db:migrate`.
 
 ---
 
@@ -84,15 +105,20 @@ Si el merge no actualizó `config/app.yml`, editar y poner `version: 'X.Y.Z'` se
 
 ### 5. Dependencias y migraciones (en el entorno de despliegue)
 
+**En este servidor (Docker Compose):** reconstruir imagen, migrar y reiniciar:
+
 ```bash
-bundle install
-pnpm install
-bundle exec rails db:migrate
+cd /opt/chatwoot
+docker build -f docker/Dockerfile -t chatwoot/chatwoot:custom-css .
+docker compose -f docker-compose.custom-css.yaml run --rm rails bundle exec rails db:migrate
+docker compose -f docker-compose.custom-css.yaml down && docker compose -f docker-compose.custom-css.yaml up -d
 ```
+
+(Si en otro entorno usaran Ruby en el host: `bundle install`, `pnpm install`, `bundle exec rails db:migrate`.)
 
 ### 6. Pruebas
 
-- Arrancar con `pnpm dev` o `make run` (o Docker) y comprobar login, inbox, widget (incl. custom CSS si aplica).
+- Con Docker Compose: tras `up -d`, comprobar en el navegador login, inbox y widget (incl. custom CSS).
 
 ### 7. Subir ramas al fork
 
