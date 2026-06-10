@@ -35,6 +35,6 @@ class Notification::FcmService
   end
 
   def credentials_path
-    StringIO.new(@credentials)
+    StringIO.new(@credentials.is_a?(Hash) ? @credentials.to_json : @credentials)
   end
 end
